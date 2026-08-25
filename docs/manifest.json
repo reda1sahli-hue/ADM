@@ -1,0 +1,14 @@
+{
+  "name": "Gestion CIT",
+  "short_name": "Gestion CIT",
+  "description": "Générateur de message rapide pour la gestion du trafic autoroutier",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f1720",
+  "theme_color": "#152233",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
