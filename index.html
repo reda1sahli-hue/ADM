@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestion CIT — Simple</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#152233">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#0f1720;--panel:#161f2b;--panel2:#1c2734;--line:#2a3a4b;
+  --blue:#3aa0e8;--green:#3fbf7f;--orange:#f0a13f;--red:#e35d5d;
+  --txt:#e8eef4;--mut:#8fa3b5;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--txt)}
+header{background:linear-gradient(135deg,#0b1420,#152233);padding:26px 18px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:22px;color:#fff}
+header p{margin:6px 0 0;color:var(--mut);font-size:13px}
+.wrap{max-width:820px;margin:auto;padding:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+label{display:block;font-size:12px;font-weight:bold;color:var(--mut);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+input,select,textarea{
+  width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;
+  background:var(--panel2);color:var(--txt);font:inherit;font-size:15px
+}
+textarea{min-height:100px;resize:vertical}
+input::placeholder,textarea::placeholder{color:#5c7085}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.field{margin-bottom:14px}
+select.blue{background:#0f2436;border:2px solid var(--blue);color:#bfe0f7;font-weight:700}
+select.orange{background:#2e2110;border:2px solid var(--orange);color:#f6d9ab;font-weight:700}
+.loc{margin-top:4px;padding:12px;background:#12261c;border-left:4px solid var(--green);border-radius:8px;font-size:14px;color:#bfe8d3;display:none}
+.loc.show{display:block}
+.loc.warn{background:#2a230f;border-left-color:var(--orange);color:#f3d99c}
+button{border:0;border-radius:8px;padding:12px 16px;cursor:pointer;color:#fff;font-weight:bold;background:var(--blue);font-size:15px}
+button.green{background:var(--green)}
+button.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.msgbox{white-space:pre-wrap;width:100%;min-height:180px;font-size:15px;line-height:1.55;padding:14px;border-radius:10px;
+  background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--blue);color:var(--txt)}
+.status{margin-top:8px;font-size:13px;color:var(--mut);min-height:18px}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
+@media(max-width:600px){.grid2,.grid3{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header><div class="wrap" style="padding:0">
+<h1>🚧 Gestion CIT — Message rapide</h1>
+<p>Sélectionnez l'axe et le PK, décrivez l'événement, et générez le message</p>
+</div></header>
+
+<div class="wrap">
+  <section class="panel">
+    <div class="grid2">
+      <div class="field">
+        <label>Axe</label>
+        <select id="axis"></select>
+      </div>
+      <div class="field">
+        <label>Sens</label>
+        <select id="sens"></select>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>PK</label>
+        <input id="pk" type="number" step="0.1" placeholder="Ex: 24">
+      </div>
+      <div class="field">
+        <label>Niveau</label>
+        <select id="niveau" class="blue">
+          <option>Courant</option>
+          <option>Critique</option>
+          <option>Majeur</option>
+        </select>
+      </div>
+    </div>
+    <div id="loc" class="loc"></div>
+
+    <div class="grid3" style="margin-top:14px">
+      <div class="field">
+        <label>Type d'événement</label>
+        <select id="type" class="blue"></select>
+      </div>
+      <div class="field">
+        <label>Détection</label>
+        <select id="detection" class="blue"></select>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="field">
+        <label>État</label>
+        <select id="etat" class="blue">
+          <option value="">Non renseigné</option>
+          <option>En cours de confirmation</option>
+          <option>Confirmé</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Action</label>
+        <select id="action" class="orange"></select>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div class="field">
+        <label>Voie impactée</label>
+        <select id="voie" class="orange"></select>
+      </div>
+      <div class="field">
+        <label>Impact sur la circulation</label>
+        <select id="impact" class="orange"></select>
+      </div>
+      <div class="field">
+        <label>Dégâts</label>
+        <select id="degats" class="orange"></select>
+      </div>
+    </div>
+
+    <div class="grid4">
+      <div class="field">
+        <label>Gendarmerie royale</label>
+        <select id="gendarmerie"></select>
+      </div>
+      <div class="field">
+        <label>Dépannage</label>
+        <select id="depannage"></select>
+      </div>
+      <div class="field">
+        <label>Patrouilleur</label>
+        <select id="patrouilleur"></select>
+      </div>
+      <div class="field">
+        <label>Protection Civile</label>
+        <select id="protection"></select>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div class="field">
+        <label>Blessés légers</label>
+        <input id="blLeger" type="number" min="0" placeholder="0">
+      </div>
+      <div class="field">
+        <label>Blessés graves</label>
+        <input id="blGrave" type="number" min="0" placeholder="0">
+      </div>
+      <div class="field">
+        <label>Tués</label>
+        <input id="blTue" type="number" min="0" placeholder="0">
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <label>Plus de détail</label>
+      <textarea id="event" placeholder="Décrivez précisément ce qui s'est passé (accident, panne, embouteillage...)"></textarea>
+    </div>
+
+    <div class="actions">
+      <button id="generate">Générer message</button>
+      <button id="reset" class="ghost">Reset</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <label>Message</label>
+    <textarea id="message" class="msgbox" readonly></textarea>
+    <div class="actions">
+      <button id="copy" class="green">📋 Copier</button>
+    </div>
+    <div id="status" class="status"></div>
+  </section>
+</div>
+
+<footer>Gestion CIT — version simplifiée</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+
+const AXIS_DATA={"A1": {"stations": [{"pk": 1.0, "name": "Rabat ( Hay Riad)"}, {"pk": 3.0, "name": "Temara"}, {"pk": 10.0, "name": "Ain Atiq Sortie"}, {"pk": 14.0, "name": "Bifurcation counternement Rabat"}, {"pk": 16.0, "name": "Skhirat Sortie"}, {"pk": 24.0, "name": "Oueud Cherat"}, {"pk": 29.0, "name": "Bouznika sortie"}, {"pk": 30.0, "name": "Barrière Principale 2 de Bouznika"}, {"pk": 36.0, "name": "Aire de services Bouznika"}, {"pk": 48.0, "name": "Mohammédia Est"}, {"pk": 52.0, "name": "Ben yekhlef - côté terre"}, {"pk": 57.0, "name": "Mohammédia Ouest"}, {"pk": 59.0, "name": "Penetrante Ainharouda"}, {"pk": 70.0, "name": "Tit Méllil BPV"}, {"pk": 72.0, "name": "Sortie Tit Méllil"}, {"pk": 76.0, "name": "Casa Port"}, {"pk": 80.0, "name": "Casa Mediouna"}, {"pk": 85.0, "name": "Aire de services contournement de casa"}, {"pk": 86.0, "name": "Carrefour Sidi Maarouf"}, {"pk": 92.0, "name": "Lissasfa"}, {"pk": 93.0, "name": "Ennasim"}, {"pk": 107.0, "name": "Had Soualem"}, {"pk": 124.0, "name": "Aire de services Bir Jdid"}, {"pk": 126.0, "name": "Bir Jdid"}, {"pk": 142.0, "name": "Tnine Chtouka"}, {"pk": 162.0, "name": "Azemmour"}, {"pk": 168.0, "name": "El Jadida"}, {"pk": 177.0, "name": "JADIDA-SUD"}, {"pk": 188.0, "name": "El Jorf"}, {"pk": 201.0, "name": "Aire de services Dokalla"}, {"pk": 220.0, "name": "SIDI-SMAIL"}, {"pk": 254.0, "name": "Aire de services OUALIDIA"}, {"pk": 264.0, "name": "OUALIDIA"}, {"pk": 297.0, "name": "SAFI-NORD"}, {"pk": 308.0, "name": "SAFI"}]}, "A2": {"stations": [{"pk": 16.0, "name": "Sidi Allal El Bahraoui"}, {"pk": 42.0, "name": "Tiflet"}, {"pk": 65.0, "name": "Aire de services Khémisset"}, {"pk": 67.0, "name": "Khémisset"}, {"pk": 120.0, "name": "Meknès Ouest"}, {"pk": 124.0, "name": "Aire de services Méknès"}, {"pk": 130.0, "name": "Meknès Est"}, {"pk": 156.0, "name": "Ain Taoujtate"}, {"pk": 172.0, "name": "Fès"}, {"pk": 182.0, "name": "FES Centre"}, {"pk": 190.0, "name": "FES Est"}, {"pk": 192.0, "name": "Aire de services Fés"}, {"pk": 216.0, "name": "Ras Tabouda"}, {"pk": 241.0, "name": "Tahla"}, {"pk": 243.0, "name": "Aire de servicesTahla"}, {"pk": 265.0, "name": "Oued Amlil"}, {"pk": 284.0, "name": "Taza Ouest"}, {"pk": 296.0, "name": "Taza Est"}, {"pk": 318.0, "name": "Aire de services M'soun"}, {"pk": 323.0, "name": "Msoun"}, {"pk": 360.0, "name": "Guercif"}, {"pk": 377.0, "name": "Aire de services Guercif"}, {"pk": 394.0, "name": "Taourirt"}, {"pk": 402.0, "name": "Taourirt"}, {"pk": 449.0, "name": "Laayoun"}, {"pk": 453.0, "name": "Aire de services Laayoune"}, {"pk": 493.0, "name": "Oujda"}]}, "A3": {"stations": [{"pk": 0.0, "name": "Carrefour Sidi Maarouf"}, {"pk": 2.0, "name": "SortieVille verte"}, {"pk": 8.0, "name": "Sortie Bouskoura"}, {"pk": 13.0, "name": "Aéoroport Mohamed V"}, {"pk": 15.0, "name": "Berrechid Centre (Pk 15)"}, {"pk": 21.0, "name": "Berrechid Centre (Pk 21)"}, {"pk": 34.0, "name": "Berrchid Sud (Pk34)"}, {"pk": 35.0, "name": "Aire de services berrechid"}, {"pk": 52.0, "name": "Settat Nord"}, {"pk": 65.0, "name": "Settat Centre"}, {"pk": 75.0, "name": "Aire de services settat"}, {"pk": 104.0, "name": "Ech Machraa ben abbou"}, {"pk": 107.0, "name": "Ouad Oum Rabii"}, {"pk": 108.0, "name": "Aire de services Oum Rabii"}, {"pk": 128.0, "name": "Skhour Rhamna"}, {"pk": 160.0, "name": "Benguerir"}, {"pk": 199.0, "name": "Bifurcation Marrakech"}, {"pk": 216.0, "name": "Tamansourt"}, {"pk": 233.0, "name": "Targa"}, {"pk": 249.0, "name": "Loudaya"}, {"pk": 279.0, "name": "Aire de services Chichaoua"}, {"pk": 283.0, "name": "Chichaoua"}, {"pk": 310.0, "name": "IMIN TANOUT"}, {"pk": 325.0, "name": "Tunnel"}, {"pk": 345.0, "name": "Aire de services IMIN TANOUT"}, {"pk": 371.0, "name": "Argana"}, {"pk": 406.0, "name": "Aire de services Amsekroud"}, {"pk": 418.0, "name": "Amsekroud"}]}, "A5": {"stations": [{"pk": 0.0, "name": "Ksr sghir"}, {"pk": 16.0, "name": "Melloussa BPV"}, {"pk": 17.0, "name": "Melloussa sur Sortie"}, {"pk": 18.0, "name": "Melloussa sur Echangeur"}, {"pk": 24.0, "name": "Aire de services Tanger Med"}, {"pk": 27.0, "name": "Tanger Est"}, {"pk": 27.0, "name": "Ain Dalia"}, {"pk": 50.0, "name": "Tanger Ouest"}, {"pk": 74.0, "name": "Aire de services Asilah"}, {"pk": 78.0, "name": "Asilah"}, {"pk": 91.0, "name": "Sidi El Yamani"}, {"pk": 110.0, "name": "Luxis"}, {"pk": 114.0, "name": "Aire de services Larache"}, {"pk": 118.0, "name": "Larache"}, {"pk": 151.0, "name": "Mly Bousselham"}, {"pk": 182.0, "name": "Aire de services M'Nasra"}, {"pk": 184.0, "name": "M'Nasra"}, {"pk": 222.0, "name": "Kénitra Nord"}, {"pk": 224.0, "name": "Sortie Kénitra Nord"}, {"pk": 232.0, "name": "Sortie Elmassira"}, {"pk": 238.0, "name": "Kénitra Centre"}, {"pk": 238.0, "name": "Aire de services Kenitra"}, {"pk": 256.0, "name": "Bouknadel  S"}, {"pk": 265.0, "name": "Dar Essakah"}, {"pk": 268.0, "name": "Sortie Sala Al Jadida"}, {"pk": 270.0, "name": "Technopolis"}, {"pk": 272.0, "name": "Sala Al Jadida BPV"}, {"pk": 276.0, "name": "Pont M.6"}, {"pk": 278.0, "name": "Oum Azza Sorties"}, {"pk": 280.0, "name": "Aire de services Counterenement de Rabat"}, {"pk": 289.0, "name": "EL MENZAH -SORTIE"}, {"pk": 295.0, "name": "Tamesna"}, {"pk": 306.0, "name": "Bifurcation counternement Rabat"}]}, "A7": {"stations": []}, "A31": {"stations": []}, "A4": {"stations": [{"pk": 14.0, "name": "Aire de services Berrechid"}, {"pk": 36.0, "name": "Ben Ahmed"}, {"pk": 69.0, "name": "Aire de services Khouribga"}, {"pk": 75.0, "name": "Khouribga"}, {"pk": 105.0, "name": "Oued Zem Ouest"}, {"pk": 114.0, "name": "Oued Zem Est"}, {"pk": 118.0, "name": "Aire de services Oued Zem"}, {"pk": 133.0, "name": "Boujâad"}, {"pk": 149.0, "name": "Kasbat Tadla"}, {"pk": 169.0, "name": "BPV Béni Mellal"}]}};
+const AXIS_DIRS={"A1": ["Vers Rabat", "Vers Safi"], "A2": ["Vers Rabat", "Vers Oujda"], "A3": ["Vers Casablanca", "Vers Agadir"], "A5": ["Vers Rabat", "Vers Tanger"], "A7": ["Vers Fnideq", "Vers Tétouan"], "A31": ["Vers Berrechid", "Vers Tit Mellil"], "A4": ["Vers Berrechid", "Vers Benimellal"]};
+
+const TYPE_OPTIONS=["Accident d'un seul véhicule léger","Accident entre plusieurs véhicules légers","Accident entre véhicule léger et poids lourd","Accident d'un seul poids lourd","Accident entre poids lourds","Accident impliquant un autocar","Accident d'un véhicule transportant des matières dangereuses","Accident impliquant une moto","Accident impliquant un piéton","Accident impliquant un animal","Accident impliquant plusieurs catégories de véhicules","Carambolage","Panne véhicule léger","Panne poids lourd","Panne autocar","Panne véhicule TMD","Obstacle sur chaussée","Chargement renversé sur chaussée","Incendie véhicule léger","Incendie poids lourd","Incendie végétation / accotement","Piéton sur autoroute","Animal sur autoroute","Travaux","Bouchon","Ralentissement","Circulation arrêtée","Fermeture de voie","Fermeture du sens","Inondation / eau sur chaussée","Glissement de terrain","Dégradation d'ouvrage","Autre événement"];
+const INTERVENANT_OPTIONS=["Non engagé","Avisé","Envoyé","En route","Sur place","Intervention en cours","Terminé"];
+const DETECTION_OPTIONS=["Usager.5050","Patrouilleur","Caméra","Opérateur radio","Gendarmerie royale","Autre"];
+const ACTION_OPTIONS=["Confirmé","En cours","Terminé","À confirmer","Fausse alerte"];
+const VOIE_OPTIONS=["Voie lente","Voie médiane","Voie rapide","BAU","BCD","TPC","ITPC","Gare de péage","Aire de service","Voie lente et Voie médiane","Voie lente et Voie rapide","BAU et Voie lente","Voie rapide et TPC","BCD et BAU","BCD, BAU et Voie lente","Voie lente,Voie médiane et Voie rapide"];
+const IMPACT_OPTIONS=["Aucun impact","Ralentissement","Bouchon","Circulation arrêtée","Voie neutralisée","Fermeture"];
+const DEGATS_OPTIONS=["Uniquement dégâts matériels","Dégâts matériels et corporels","Dégâts matériels et infrastructure","Dégâts matériels, corporels et infrastructure"];
+
+$("type").innerHTML='<option value=""></option>'+TYPE_OPTIONS.map(v=>`<option>${v}</option>`).join("");
+$("detection").innerHTML='<option value=""></option>'+DETECTION_OPTIONS.map(v=>`<option>${v}</option>`).join("");
+$("action").innerHTML='<option value=""></option>'+ACTION_OPTIONS.map(v=>`<option>${v}</option>`).join("");
+$("voie").innerHTML='<option value=""></option>'+VOIE_OPTIONS.map(v=>`<option>${v}</option>`).join("");
+$("impact").innerHTML='<option value=""></option>'+IMPACT_OPTIONS.map(v=>`<option>${v}</option>`).join("");
+$("degats").innerHTML='<option value=""></option>'+DEGATS_OPTIONS.map(v=>`<option>${v}</option>`).join("");
+["gendarmerie","depannage","patrouilleur","protection"].forEach(id=>{
+  $(id).innerHTML='<option value=""></option>'+INTERVENANT_OPTIONS.map(v=>`<option>${v}</option>`).join("");
+});
+
+// Init axe select
+$("axis").innerHTML=Object.keys(AXIS_DATA).map(a=>`<option>${a}</option>`).join("");
+function updateSens(){
+  const a=$("axis").value;
+  $("sens").innerHTML=(AXIS_DIRS[a]||[]).map(v=>`<option>${v}</option>`).join("");
+}
+$("axis").addEventListener("change",()=>{updateSens();locate();});
+$("pk").addEventListener("input",locate);
+$("sens").addEventListener("change",locate);
+updateSens();
+
+function locationData(){
+  const axis=$("axis").value, pk=parseFloat($("pk").value), sens=$("sens").value;
+  if(!Number.isFinite(pk)) return null;
+  const c=AXIS_DATA[axis];
+  if(!c||!c.stations||!c.stations.length) return {axis,pk,sens,noData:true};
+  const ss=[...c.stations].sort((a,b)=>a.pk-b.pk);
+  let before=[...ss].filter(x=>x.pk<=pk).pop()||ss[0];
+  let after=ss.find(x=>x.pk>=pk)||ss[ss.length-1];
+  const nearest=Math.abs(pk-before.pk)<=Math.abs(after.pk-pk)?before:after;
+  const diff=Math.abs(pk-nearest.pk);
+  const rel=pk<nearest.pk?"avant":pk>nearest.pk?"après":"au niveau de";
+  return {axis,pk,sens,before,after,nearest,diff,rel,noData:false};
+}
+
+function locate(){
+  const box=$("loc");
+  const x=locationData();
+  if(!x){ box.classList.remove("show","warn"); box.textContent=""; return; }
+  box.classList.add("show");
+  if(x.noData){
+    box.classList.add("warn");
+    box.textContent=`📍 ${x.axis} / PK${x.pk} — pas de point de repère disponible pour cet axe.`;
+    return;
+  }
+  box.classList.remove("warn");
+  const distTxt = x.diff===0 ? "" : ` / ${x.diff.toFixed(x.diff%1?1:0)}km ${x.rel} ${x.nearest.name}`;
+  box.textContent=`📍 ${x.axis} / PK${x.pk}${distTxt} ${x.sens?("➡️ "+x.sens.replace("Vers ","")):""}`;
+}
+
+function buildMessage(){
+  const x=locationData();
+  const niveau=$("niveau").value;
+  const evt=$("event").value.trim();
+  const now=new Date();
+  const dateStr=now.toLocaleString("fr-FR");
+
+  if(!x){ return "⚠️ Renseignez le PK avant de générer le message."; }
+
+  let locLine;
+  if(x.noData){
+    locLine=`${x.axis} / PK${x.pk}${x.sens?" ➡️ "+x.sens.replace("Vers ",""):""}`;
+  }else{
+    const distTxt = x.diff===0 ? "" : ` / ${x.diff.toFixed(x.diff%1?1:0)}km ${x.rel} ${x.nearest.name}`;
+    locLine=`${x.axis} / PK${x.pk}${distTxt}${x.sens?" ➡️ "+x.sens.replace("Vers ",""):""}`;
+  }
+
+  const niveauIcon = niveau==="Critique" ? "🔴" : niveau==="Alerte" ? "🟠" : "🔵";
+
+  const bl=parseInt($("blLeger").value||"0",10);
+  const bg=parseInt($("blGrave").value||"0",10);
+  const bt=parseInt($("blTue").value||"0",10);
+  const bilanParts=[];
+  if(bt>0) bilanParts.push(`${bt} tué${bt>1?"s":""}`);
+  if(bg>0) bilanParts.push(`${bg} blessé${bg>1?"s":""} grave${bg>1?"s":""}`);
+  if(bl>0) bilanParts.push(`${bl} blessé${bl>1?"s":""} léger${bl>1?"s":""}`);
+  const bilanLine = bilanParts.length ? `\n🚑 Bilan : ${bilanParts.join(", ")}` : "";
+
+  const type=$("type").value;
+  const typeLine = type ? `\n🚗 Type : ${type}` : "";
+
+  const detection=$("detection").value;
+  const detectionLine = detection ? `\n🔎 Détection : ${detection}` : "";
+
+  const etat=$("etat").value;
+  const etatLine = etat ? `\n📌 État : ${etat}` : "";
+
+  const action=$("action").value;
+  const actionLine = action ? `\n⚙️ Action : ${action}` : "";
+
+  const voie=$("voie").value;
+  const voieLine = voie ? `\n🛣️ Voie impactée : ${voie}` : "";
+
+  const impact=$("impact").value;
+  const impactLine = impact ? `\n🚦 Impact : ${impact}` : "";
+
+  const degats=$("degats").value;
+  const degatsLine = degats ? `\n💥 Dégâts : ${degats}` : "";
+
+  const gendVal=$("gendarmerie").value;
+  const depVal=$("depannage").value;
+  const patVal=$("patrouilleur").value;
+  const protVal=$("protection").value;
+  const intervParts=[];
+  if(gendVal) intervParts.push(`Gendarmerie : ${gendVal}`);
+  if(depVal) intervParts.push(`Dépannage : ${depVal}`);
+  if(patVal) intervParts.push(`Patrouilleur : ${patVal}`);
+  if(protVal) intervParts.push(`Protection Civile : ${protVal}`);
+  const intervLine = intervParts.length ? `\n🚓 ${intervParts.join(" | ")}` : "";
+
+  return `${niveauIcon} ${niveau.toUpperCase()}
+📅 ${dateStr}
+📍 ${locLine}${typeLine}${detectionLine}${etatLine}${actionLine}${voieLine}${impactLine}${degatsLine}${bilanLine}${intervLine}
+
+📝 ${evt || "Description non renseignée."}`;
+}
+
+$("generate").onclick=()=>{
+  $("message").value=buildMessage();
+  $("status").textContent="";
+};
+
+async function copyTextRobust(text){
+  if(!text) return false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  }catch(e){}
+  try{
+    const ta=document.createElement("textarea");
+    ta.value=text;
+    ta.style.position="fixed";ta.style.opacity="0.01";
+    document.body.appendChild(ta);
+    ta.focus();ta.select();
+    const ok=document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  }catch(e){ return false; }
+}
+
+$("copy").onclick=async()=>{
+  const text=$("message").value.trim();
+  if(!text){ $("status").textContent="Le message est vide."; return; }
+  const ok=await copyTextRobust(text);
+  $("status").textContent = ok ? "✅ Message copié. Vous pouvez le coller dans WhatsApp." : "⚠️ Copie bloquée par le navigateur, sélectionnez et copiez manuellement.";
+};
+
+$("reset").onclick=()=>{
+  $("pk").value="";
+  $("event").value="";
+  $("niveau").selectedIndex=0;
+  $("blLeger").value="";
+  $("blGrave").value="";
+  $("blTue").value="";
+  $("type").selectedIndex=0;
+  $("detection").selectedIndex=0;
+  $("etat").selectedIndex=0;
+  $("action").selectedIndex=0;
+  $("voie").selectedIndex=0;
+  $("impact").selectedIndex=0;
+  $("degats").selectedIndex=0;
+  $("gendarmerie").selectedIndex=0;
+  $("protection").selectedIndex=0;
+  $("depannage").selectedIndex=0;
+  $("patrouilleur").selectedIndex=0;
+  $("message").value="";
+  $("status").textContent="";
+  locate();
+};
+
+locate();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("service-worker.js").catch(()=>{});
+  });
+}
+</script>
+</body></html>
