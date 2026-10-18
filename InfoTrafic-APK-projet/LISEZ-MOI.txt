@@ -1,0 +1,7 @@
+APK Info Trafic — construction automatique via GitHub
+
+1) Ouvrir le fichier URL.txt et remplacer son contenu par le lien HTTPS de l'application mobile (ex. https://monsite.vercel.app/)
+2) Créer un dépôt GitHub (privé OK), y envoyer TOUS ces fichiers (y compris le dossier .github)
+3) Onglet « Actions » > « Build APK » > « Run workflow »
+4) Après ~5 minutes : ouvrir l'exécution terminée > « Artifacts » > télécharger InfoTrafic-APK
+5) Dans le ZIP : app-release-signed.apk (à installer sur Android) + android.keystore (à garder : nécessaire pour les mises à jour futures ; le déposer dans le dépôt)
